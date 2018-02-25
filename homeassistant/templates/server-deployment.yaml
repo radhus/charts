@@ -1,0 +1,71 @@
+{{- $tag := default .Chart.AppVersion .Values.server.image.tag -}}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "homeassistant.server.fullname" . }}
+  labels:
+    app: {{ template "homeassistant.name" . }}
+    chart: {{ template "homeassistant.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ .Values.server.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "homeassistant.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "homeassistant.name" . }}
+        release: {{ .Release.Name }}
+        component: {{ .Values.server.name }}
+    spec:
+      containers:
+        - name: {{ template "homeassistant.name" . }}
+          image: "{{ .Values.server.image.repository }}:{{ $tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          command:
+            - "python"
+            - "-m"
+            - "homeassistant"
+            - "--config"
+            - "/config"
+            - "--log-file"
+            - "/storage/home-assistant.log"
+          ports:
+            - containerPort: 8123
+              protocol: TCP
+          # TODO: livenessProbe
+          # TODO: readinessProbe
+          resources:
+{{ toYaml .Values.server.resources | indent 12 }}
+    {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.server.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.server.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: storage-volume
+              mountPath: /storage
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "homeassistant.server.fullname" . }}-config
+        - name: storage-volume
+      {{- if .Values.server.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ if .Values.server.persistentVolume.existingClaim }}{{ .Values.server.persistentVolume.existingClaim }}{{- else }}{{ template "homeassistant.server.fullname" . }}{{- end }}
+      {{- else }}
+          emptyDir: {}
+      {{- end -}}

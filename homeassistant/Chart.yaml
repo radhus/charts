@@ -1,0 +1,7 @@
+name: homeassistant
+version: 0.63.3-chart.1
+description: An open-source home automation platform.
+home: https://home-assistant.io/
+sources:
+  - https://github.com/home-assistant/home-assistant
+appVersion: 0.63.3

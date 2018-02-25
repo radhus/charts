@@ -1,0 +1,147 @@
+server:
+  ## Home Assistant server image
+  ##
+  image:
+    repository: "homeassistant/home-assistant"
+    pullPolicy: IfNotPresent
+    ## tag defaults to AppVersion in Chart.yaml
+    # tag: "0.63.3"
+
+  ## Home Assistant server container name
+  ##
+  name: server
+
+  ## Home Assistant server Service
+  ##
+  service:
+    type: ClusterIP
+    port: 80
+
+  ## Home Assistant server Ingress
+  ##
+  ingress:
+    ## If true, Ingress will be created
+    ##
+    enabled: false
+
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    path: /
+    hosts:
+      - chart-example.local
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # Persist data to a persistent volume
+  persistentVolume:
+    ## If true, this will create a Persistent Volume Claim
+    enabled: true
+
+    ## Existing claim name
+    ## If defined, PVC must be created manually before volume will be bound
+    existingClaim: ""
+
+    accessModes:
+      - ReadWriteOnce
+
+    ## Volume size
+    ## Default: 1Gi
+    size: 1Gi
+
+    ## Storage class
+    ## set to "-" results in `storageClassName: ""`
+    # storageClass: ""
+
+    ## Subdirectory to mount
+    ## Useful if the volume's root directory is not empty
+    subPath: ""
+
+    annotations: {}
+
+  resources: {}
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+serverFiles:
+  configuration.yaml:
+    # TODO: api key in secret
+    homeassistant:
+      # Name of the location where Home Assistant is running
+      name: Home
+      # Location required to calculate the time the sun rises and sets
+      # latitude: 10.00
+      # longitude: 10.00
+      # Impacts weather/sunrise data (altitude above sea level in meters)
+      # elevation: 10
+      # metric for Metric, imperial for Imperial
+      unit_system: metric
+      # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      time_zone: "Europe/Stockholm"
+      # Customization file
+      # customize: !include customize.yaml
+
+    # Show links to resources in log and frontend
+    introduction:
+
+    # Enables the frontend
+    frontend:
+
+    # Enables configuration UI
+    config:
+
+    http:
+      # Secrets are defined in the file secrets.yaml
+      # api_password: !secret http_password
+      # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+      # base_url: example.duckdns.org:8123
+
+    # Discover some devices automatically
+    discovery:
+
+    # Allows you to issue voice commands from the frontend in enabled browsers
+    conversation:
+
+    # Enables support for tracking state changes over time
+    history:
+
+    # Tracked history is kept for 10 days
+    recorder:
+      purge_keep_days: 10
+      # Set default database path to the storage volume
+      # Four initial slashes = absolute path
+      db_url: "sqlite:////storage/home-assistant_v2.db"
+
+    # View all events in a logbook
+    logbook:
+
+    # Enables a map showing the location of tracked devices
+    map:
+
+    # Track the sun
+    sun:
+
+    # Weather prediction
+    sensor:
+      - platform: yr
+
+    # Text to speech
+    tts:
+      - platform: google
+
+    # Cloud
+    cloud:
+
+    #group: !include groups.yaml
+    #automation: !include automations.yaml
+    #script: !include scripts.yaml
