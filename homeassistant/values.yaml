@@ -17,6 +17,12 @@ server:
     type: ClusterIP
     port: 80
 
+    # Service annotations
+    annotations:
+      # Auto enable Prometheus scraping
+      prometheus.io/scrape: 'true'
+      prometheus.io/path: '/api/prometheus'
+
   ## Home Assistant server Ingress
   ##
   ingress:
@@ -105,6 +111,9 @@ serverFiles:
       # api_password: !secret http_password
       # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
       # base_url: example.duckdns.org:8123
+
+    # Export metrics with Prometheus
+    prometheus:
 
     # Discover some devices automatically
     discovery:
