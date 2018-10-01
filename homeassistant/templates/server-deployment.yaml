@@ -56,10 +56,13 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
           volumeMounts:
-            - name: config-volume
-              mountPath: /config
             - name: storage-volume
-              mountPath: /storage
+              mountPath: /config
+            {{- range $key, $value := .Values.serverFiles }}
+            - name: config-volume
+              mountPath: "/config/{{ $key }}"
+              subPath: "{{ $key }}"
+            {{ end }}
       volumes:
         - name: config-volume
           configMap:
